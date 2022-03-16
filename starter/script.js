@@ -190,7 +190,7 @@ TEST COORDINATES 2: -33.933, 18.474
 GOOD LUCK 😀
 */
 // 1. Create a function 'whereAmI' which takes as inputs a latitude value (lat) and a longitude value (lng) (these are GPS coordinates, examples are below).
-
+/*
 const whereamI = function (lat, lng) {
   fetch(
     `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`
@@ -228,3 +228,47 @@ const whereamI = function (lat, lng) {
 whereamI(52.508, 13.381);
 whereamI(19.037, 72.873);
 whereamI(-33.933, 18.474);
+*/
+/*
+console.log(`test start`);
+setTimeout(() => console.log(`0 sec timer`), 0);
+Promise.resolve(`resolved promise 1`).then(res => console.log(res));
+
+Promise.resolve(`Resolved promise 2`).then(res => {
+  for (let i = 0; i < 1000000000; i++) {}
+  console.log(res);
+});
+
+console.log(`Test end`);
+*/
+
+// Executor function
+const lotteryPromise = new Promise(function (resolve, reject) {
+  console.log(`Lottery draw is happening`);
+  setTimeout(function () {
+    if (Math.random() > 0.5) {
+      resolve(`You Win`);
+    } else {
+      reject(new Error(`You Lose`));
+    }
+  }, 2000);
+});
+
+lotteryPromise.then(res => console.log(res)).catch(err => console.error(err));
+
+// Promisifying setTimeout
+const wait = function (seconds) {
+  return new Promise(function (resolve, reject) {
+    setTimeout(resolve, seconds * 1000);
+  });
+};
+
+wait(2)
+  .then(() => {
+    console.log(`I waited for 2 seconds`);
+    return wait(1);
+  })
+  .then(() => console.log(`I waited for 1 second`));
+
+Promise.resolve(`abc`).then(x => console.log(x));
+Promise.reject(new Error(`abc`)).catch(x => console.error(x));
