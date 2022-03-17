@@ -1,5 +1,5 @@
 'use strict';
-
+/*
 const btn = document.querySelector('.btn-country');
 const countriesContainer = document.querySelector('.countries');
 
@@ -38,6 +38,7 @@ const getJSON = function (url, errorMsg = 'Something went wrong') {
     return response.json();
   });
 };
+*/
 ///////////////////////////////////////
 // Old way of doing this
 /*
@@ -128,7 +129,7 @@ getCountryAndNeighbor('usa');
 //     } else {
 //       return null
 //     };
-
+/*
 //// Cannot use this for challenge # 1
 const getCountryData = function (country) {
   // Country 1
@@ -156,7 +157,7 @@ const getCountryData = function (country) {
       countriesContainer.style.opacity = 1;
     });
 };
-
+*/
 // btn.addEventListener('click', function () {
 //   getCountryData('portugal');
 // });
@@ -241,7 +242,7 @@ Promise.resolve(`Resolved promise 2`).then(res => {
 
 console.log(`Test end`);
 */
-
+/*
 // Executor function
 const lotteryPromise = new Promise(function (resolve, reject) {
   console.log(`Lottery draw is happening`);
@@ -272,3 +273,135 @@ wait(2)
 
 Promise.resolve(`abc`).then(x => console.log(x));
 Promise.reject(new Error(`abc`)).catch(x => console.error(x));
+*/
+/*
+const getPosition = function () {
+  return new Promise(function (resolve, reject) {
+    // navigator.geolocation.getCurrentPosition(
+    //   position => resolve(position),
+    //   err => reject(err)
+    // );
+    navigator.geolocation.getCurrentPosition(resolve, reject);
+  });
+};
+
+getPosition().then(pos => console.log(pos));
+
+const whereamI = function () {
+  getPosition()
+    .then(pos => {
+      const { latitude: lat, longitude: lng } = pos.coords;
+      return fetch(
+        `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`
+      );
+    })
+
+    .then(country => {
+      console.log(country);
+      if (!country.ok)
+        throw new Error(`Problem with geocoding ${country.status}`);
+      return country.json();
+    })
+    .then(data => {
+      console.log(data);
+      const countryName = data.countryName;
+      const cityName = data.city;
+      // 3. Once you have the data, take a look at it in the console to see all the attributes that you recieved about the provided location. Then, using this data, log a messsage like this to the console: 'You are in Berlin, Germany'
+      console.log(`You are in ${cityName} ${countryName}`);
+
+      return fetch(`https://restcountries.com/v3.1/name/${countryName}`);
+    })
+    .then(res => {
+      if (!res.ok) throw new Error(`Country not found (${res.status})`);
+      console.log(res);
+      return res.json();
+    })
+    .then(data1 => renderCountry(...data1))
+    .catch(err => {
+      console.error(`${err} *`);
+      renderError(`Something went wrong: ${err.message}`);
+    })
+    .finally(() => {
+      countriesContainer.style.opacity = 1;
+    });
+};
+
+btn.addEventListener('click', whereamI);
+*/
+
+///////////////////////////////////////
+// Coding Challenge #2
+
+/* 
+Build the image loading functionality that I just showed you on the screen.
+
+Tasks are not super-descriptive this time, so that you can figure out some stuff on your own. Pretend you're working on your own 😉
+
+PART 1
+1. Create a function 'createImage' which receives imgPath as an input. This function returns a promise which creates a new image (use document.createElement('img')) and sets the .src attribute to the provided image path. When the image is done loading, append it to the DOM element with the 'images' class, and resolve the promise. The fulfilled value should be the image element itself. In case there is an error loading the image ('error' event), reject the promise.
+
+If this part is too tricky for you, just watch the first part of the solution.
+
+PART 2
+2. Comsume the promise using .then and also add an error handler;
+3. After the image has loaded, pause execution for 2 seconds using the wait function we created earlier;
+4. After the 2 seconds have passed, hide the current image (set display to 'none'), and load a second image (HINT: Use the image element returned by the createImage promise to hide the current image. You will need a global variable for that 😉);
+5. After the second image has loaded, pause execution for 2 seconds again;
+6. After the 2 seconds have passed, hide the current image.
+
+TEST DATA: Images in the img folder. Test the error handler by passing a wrong image path. Set the network speed to 'Fast 3G' in the dev tools Network tab, otherwise images load too fast.
+
+GOOD LUCK 😀
+*/
+
+// const getPosition = function () {
+//   return new Promise(function (resolve, reject) {
+//     // navigator.geolocation.getCurrentPosition(
+//     //   position => resolve(position),
+//     //   err => reject(err)
+//     // );
+//     navigator.geolocation.getCurrentPosition(resolve, reject);
+//   });
+// };
+
+const img = document.querySelector('.images');
+const imgPaths = ['img/img-1.jpg', 'img/img-2.jpg', 'img/img-3.jpg'];
+const newImg = document.createElement('img');
+
+const wait = function (seconds) {
+  return new Promise(function (resolve, reject) {
+    setTimeout(resolve, seconds * 1000);
+  });
+};
+
+const createImage = function (imgPath) {
+  return new Promise(function (resolve, reject) {
+    newImg.setAttribute('src', imgPath[0]);
+    newImg.addEventListener('load', function () {
+      img.append(newImg);
+    });
+    resolve(newImg);
+    newImg.addEventListener('error', function () {
+      reject(new Error('Image failed to load'));
+    });
+  });
+};
+
+createImage(imgPaths)
+  .then(() => wait(2))
+  .then(() => (newImg.style.display = 'none'))
+  .then(() => wait(2))
+  .then(() => {
+    newImg.setAttribute('src', imgPaths[1]);
+    newImg.style.display = 'flex';
+  })
+  .then(() => wait(2))
+  .then(() => (newImg.style.display = 'none'))
+  .then(() => wait(2))
+  .then(() => {
+    newImg.setAttribute('src', imgPaths[2]);
+    newImg.style.display = 'flex';
+  })
+  .then(() => wait(2))
+  .then(() => newImg.setAttribute('src', imgPaths[3]))
+  .catch(err => console.error(err));
