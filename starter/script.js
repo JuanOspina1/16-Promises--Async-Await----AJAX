@@ -1,5 +1,5 @@
 'use strict';
-/*
+
 const btn = document.querySelector('.btn-country');
 const countriesContainer = document.querySelector('.countries');
 
@@ -23,7 +23,7 @@ const renderCountry = function (data, className = '') {
   </article>`;
 
   countriesContainer.insertAdjacentHTML('beforeend', html);
-  // countriesContainer.style.opacity = 1;
+  countriesContainer.style.opacity = 1;
 };
 
 const renderError = function (msg) {
@@ -38,7 +38,7 @@ const getJSON = function (url, errorMsg = 'Something went wrong') {
     return response.json();
   });
 };
-*/
+
 ///////////////////////////////////////
 // Old way of doing this
 /*
@@ -363,10 +363,12 @@ GOOD LUCK 😀
 //     navigator.geolocation.getCurrentPosition(resolve, reject);
 //   });
 // };
-
+/*
 const img = document.querySelector('.images');
 const imgPaths = ['img/img-1.jpg', 'img/img-2.jpg', 'img/img-3.jpg'];
 const newImg = document.createElement('img');
+
+let currentImg;
 
 const wait = function (seconds) {
   return new Promise(function (resolve, reject) {
@@ -376,7 +378,7 @@ const wait = function (seconds) {
 
 const createImage = function (imgPath) {
   return new Promise(function (resolve, reject) {
-    newImg.setAttribute('src', imgPath[0]);
+    newImg.setAttribute('src', imgPath);
     newImg.addEventListener('load', function () {
       img.append(newImg);
     });
@@ -387,21 +389,104 @@ const createImage = function (imgPath) {
   });
 };
 
-createImage(imgPaths)
-  .then(() => wait(2))
-  .then(() => (newImg.style.display = 'none'))
-  .then(() => wait(2))
-  .then(() => {
-    newImg.setAttribute('src', imgPaths[1]);
-    newImg.style.display = 'flex';
+createImage(imgPaths[0])
+  .then(img1 => {
+    currentImg = img1;
+    console.log(`Image 1 loaded`);
+    return wait(2);
   })
-  .then(() => wait(2))
-  .then(() => (newImg.style.display = 'none'))
-  .then(() => wait(2))
   .then(() => {
-    newImg.setAttribute('src', imgPaths[2]);
-    newImg.style.display = 'flex';
+    currentImg.style.display = 'none';
+    return createImage(imgPaths[1]);
   })
-  .then(() => wait(2))
-  .then(() => newImg.setAttribute('src', imgPaths[3]))
+  .then(img1 => {
+    currentImg = img1;
+    console.log(`Image 2 loaded`);
+    return wait(2);
+  })
+  .then(() => {
+    currentImg.style.display = 'none';
+    return createImage(imgPaths[2]);
+  })
   .catch(err => console.error(err));
+*/
+/*
+const wait = function (seconds) {
+  return new Promise(function (resolve) {
+    setTimeout(resolve, seconds * 1000);
+  });
+};
+
+const imgContainer = document.querySelector('.images');
+
+const createImage = function (imgPath) {
+  return new Promise(function (resolve, reject) {
+    const img = document.createElement('img');
+    img.src = imgPath;
+
+    img.addEventListener('load', function () {
+      imgContainer.append(img);
+      resolve(img);
+    });
+
+    img.addEventListener('error', function () {
+      reject(new Error('Image not found'));
+    });
+  });
+};
+
+let currentImg;
+
+createImage('img/img-1.jpg')
+  .then(img => {
+    currentImg = img;
+    console.log('Image 1 loaded');
+    return wait(2);
+  })
+  .then(() => {
+    currentImg.style.display = 'none';
+    return createImage('img/img-2.jpg');
+  })
+  .then(img => {
+    currentImg = img;
+    console.log('Image 2 loaded');
+    return wait(2);
+  })
+  .then(() => {
+    currentImg.style.display = 'none';
+  })
+  .catch(err => console.error(err));
+*/
+
+const getPosition = function () {
+  return new Promise(function (resolve, reject) {
+    navigator.geolocation.getCurrentPosition(resolve, reject);
+  });
+};
+
+const whereAmI = async function () {
+  // Geolocation
+  const pos = await getPosition();
+  const { latitude: lat, longitude: lng } = pos.coords;
+
+  // Reverse Geocoding
+  const resGeo = await fetch(
+    `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`
+  );
+  const dataGeo = await resGeo.json();
+  console.log(dataGeo);
+  // Country data
+  // fetch(`https://restcountries.com/v3.1/name/${country}`).then(res =>
+  //   console.log(res)
+  // );
+
+  const res = await fetch(
+    `https://restcountries.com/v3.1/name/${dataGeo.countryName}`
+  );
+  const data = await res.json();
+  console.log(data);
+  renderCountry(data[0]);
+};
+
+whereAmI();
+console.log(`FIRST`);
