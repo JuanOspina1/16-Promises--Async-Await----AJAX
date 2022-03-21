@@ -466,27 +466,53 @@ const getPosition = function () {
 
 const whereAmI = async function () {
   // Geolocation
-  const pos = await getPosition();
-  const { latitude: lat, longitude: lng } = pos.coords;
+  try {
+    const pos = await getPosition();
+    const { latitude: lat, longitude: lng } = pos.coords;
 
-  // Reverse Geocoding
-  const resGeo = await fetch(
-    `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`
-  );
-  const dataGeo = await resGeo.json();
-  console.log(dataGeo);
-  // Country data
-  // fetch(`https://restcountries.com/v3.1/name/${country}`).then(res =>
-  //   console.log(res)
-  // );
+    // Reverse Geocoding
+    const resGeo = await fetch(
+      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`
+    );
+    const dataGeo = await resGeo.json();
+    // Country data
+    // fetch(`https://restcountries.com/v3.1/name/${country}`).then(res =>
+    //   console.log(res)
+    // );
 
-  const res = await fetch(
-    `https://restcountries.com/v3.1/name/${dataGeo.countryName}`
-  );
-  const data = await res.json();
-  console.log(data);
-  renderCountry(data[0]);
+    const res = await fetch(
+      `https://restcountries.com/v3.1/name/${dataGeo.countryName}`
+    );
+    const data = await res.json();
+    renderCountry(data[0]);
+
+    return `You are in ${dataGeo.locality}, ${dataGeo.countryName}`;
+  } catch (err) {
+    console.error(err);
+    renderError(`Something went wrong ${err.message}`);
+
+    // Reject promise returned from async function
+    throw err;
+  }
 };
 
-whereAmI();
-console.log(`FIRST`);
+console.log(`1: Will get location`);
+// const city = whereAmI();
+// console.log(city);
+/*
+whereAmI()
+  .then(city => console.log(`2: ${city}`))
+  .catch(err => console.log(`2: ${err.message}`))
+  .finally(() => console.log(`3: Finished getting location`));
+*/
+// IFFY
+
+(async function () {
+  try {
+    const city = await whereAmI();
+    console.log(`2: ${city}`);
+  } catch (err) {
+    console.error(`2: ${err.message}`);
+  }
+  console.log(`3: Finished getting location`);
+})();
